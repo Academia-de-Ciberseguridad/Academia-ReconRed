@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Perfil @{{ callsign }} :: Red Recon{% endblock %}
+
+{% block content %}
+<a class="back" href="{{ url_for('missions') }}">&laquo; volver al tablero</a>
+
+<section class="panel profile-head">
+  <div class="avatar" aria-hidden="true">&#9608;&#9608;</div>
+  <div class="profile-id">
+    <h2 class="brief-title">@{{ callsign }}</h2>
+    <span class="rank-chip big">{{ rank }}</span>
+  </div>
+  <div class="profile-stats">
+    <div class="stat-box"><span class="big-num">{{ points }}</span><span class="muted">puntos</span></div>
+    <div class="stat-box"><span class="big-num">{{ solved_count }}/{{ total_missions }}</span><span class="muted">misiones</span></div>
+    <div class="stat-box"><span class="big-num">{{ badges | length }}</span><span class="muted">insignias</span></div>
+  </div>
+</section>
+
+<section class="panel">
+  <h3 class="sub-h">&gt; progreso_de_rango</h3>
+  <div class="progress-wrap" data-progress="{{ progress_pct }}">
+    <div class="progress-bar" style="width: {{ progress_pct }}%;"></div>
+    <span class="progress-label">{{ progress_pct }}%</span>
+  </div>
+  {% if next_threshold %}
+    <p class="muted small">siguiente rango en <strong>{{ next_threshold - points }}</strong> pts (umbral {{ next_threshold }})</p>
+  {% else %}
+    <p class="ok-line small">RANGO MÁXIMO — Maestro Recon.</p>
+  {% endif %}
+</section>
+
+<section class="grid-2">
+  <div class="panel">
+    <h3 class="sub-h">&gt; insignias</h3>
+    {% if badges %}
+      <div class="badge-wall">
+        {% for b in badges %}<span class="badge big b-{{ b }}">{{ b }}</span>{% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">Aún sin insignias. Resuelve tu primera misión para la primera sangre.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h3 class="sub-h">&gt; misiones_resueltas</h3>
+    {% if solved_list %}
+      <ul class="solved-list">
+        {% for s in solved_list %}
+          <li><span class="mid">{{ s.id }}</span> {{ s.title }}
+              <span class="pts">+{{ s.points }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Sin misiones resueltas todavía. Al tablero, operador.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

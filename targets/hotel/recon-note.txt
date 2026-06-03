@@ -1,0 +1,82 @@
+=============================================================================
+ OBJETIVO HOTEL (172.30.0.27) — hping3 / cabeceras TCP
+ Nota para el INSTRUCTOR (no es un objetivo del alumno).
+=============================================================================
+
+Esta maquina ensena a forjar paquetes a mano con hping3 y a leer las cabeceras
+TCP de las respuestas. El alumno envia flags SYN / ACK / FIN contra distintos
+puertos y deduce el estado observando QUE responde el objetivo (SYN/ACK, RST o
+silencio), y analiza ademas el TTL y el window de cada respuesta.
+
+-----------------------------------------------------------------------------
+ Tabla puerto -> respuesta esperada (a un SYN, salvo nota)
+-----------------------------------------------------------------------------
+
+  PUERTO     ESTADO     RESPUESTA          DETALLE
+  --------   --------   ----------------   --------------------------------
+  22/tcp     OPEN       SYN/ACK            portsrv en LISTEN; banner SSH-like.
+                                           hping3 ve flags=SA (SYN+ACK).
+
+  7777/tcp   OPEN       SYN/ACK            portsrv en LISTEN; banner con el
+                                           flag de M10 al conectar (TCP full).
+                                           hping3 ve flags=SA (SYN+ACK).
+                                           Flag: RECON{h4ndcr4ft3d_p4ck3ts}
+
+  80/tcp     CLOSED     RST                Nadie escucha y NO hay regla
+                                           iptables -> el kernel responde RST.
+                                           hping3 ve flags=RA (RST+ACK).
+
+  443/tcp    FILTERED   (sin respuesta)    iptables DROP en INPUT -> el paquete
+                                           se descarta. hping3 no recibe nada
+                                           (ni SYN/ACK ni RST): timeout.
+
+Nota: el contraste 80 (RST) vs 443 (silencio) es la leccion central:
+CLOSED responde, FILTERED calla.
+
+-----------------------------------------------------------------------------
+ Ejemplos de hping3 (desde attacker 172.30.0.10; hostname objetivo: hotel)
+-----------------------------------------------------------------------------
+
+  # OPEN -> esperar SYN/ACK (flags=SA). Probar tambien 22.
+  hping3 -S -p 7777 -c 1 hotel
+  hping3 -S -p 22   -c 1 hotel
+
+  # CLOSED -> esperar RST (flags=RA). El puerto 80 no tiene a nadie escuchando.
+  hping3 -A -p 80 -c 1 hotel        # ACK contra puerto cerrado -> RST
+  hping3 -S -p 80 -c 1 hotel        # SYN contra puerto cerrado -> RST
+
+  # FILTERED -> esperar SILENCIO (timeout, sin respuesta). El 443 esta DROP.
+  hping3 -F -p 443 -c 1 hotel       # FIN contra filtrado -> nada
+  hping3 -S -p 443 -c 1 hotel       # SYN contra filtrado -> nada
+
+  # Variantes utiles para combinar flags y leer cabeceras:
+  hping3 -S -A -p 22 -c 1 hotel     # SYN+ACK forjado
+  hping3 -F -p 22 -c 1 hotel        # FIN scan: open suele NO responder
+
+-----------------------------------------------------------------------------
+ Lectura de cabeceras (TTL / window) en la salida de hping3
+-----------------------------------------------------------------------------
+  - hping3 imprime por cada respuesta: flags=..., ttl=..., win=...
+  - flags=SA  -> SYN/ACK  (puerto OPEN).
+  - flags=RA  -> RST/ACK  (puerto CLOSED).
+  - sin linea de respuesta + "100% packet loss" -> FILTERED (DROP).
+  - El ttl observado por el alumno = (TTL inicial del SO) - (saltos de red).
+    En este lab, dentro de la misma red Docker, suele haber 0-1 saltos: el TTL
+    de Linux parte de 64. Sirve para hablar de fingerprinting por TTL.
+  - El window (win) tambien es una pista de fingerprinting de la pila TCP.
+
+-----------------------------------------------------------------------------
+ Pistas didacticas
+-----------------------------------------------------------------------------
+  - hping3 necesita privilegios raw (cap NET_RAW en attacker, ya provista).
+  - Usa "-c 1" para enviar un solo paquete y leer su respuesta con calma.
+  - Compara las tres situaciones (SYN/ACK, RST, silencio) para interiorizar la
+    semantica de open/closed/filtered a nivel de paquete, no de "nmap dice X".
+  - El flag de M10 vive en el banner de 7777/tcp: tras descubrir el puerto con
+    hping3, una conexion TCP normal (p.ej. nc hotel 7777) revela el banner.
+
+-----------------------------------------------------------------------------
+ Misiones asociadas
+-----------------------------------------------------------------------------
+  M10 (flag): RECON{h4ndcr4ft3d_p4ck3ts}   (banner de 7777/tcp)
+=============================================================================

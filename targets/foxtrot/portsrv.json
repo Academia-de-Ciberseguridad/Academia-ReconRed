@@ -1,0 +1,23 @@
+{
+  "_comentario": "Objetivo FOXTROT (172.30.0.26) - Escaneo UDP + DNS/NSE (mision M09).",
+  "_comentario2": "portsrv solo sirve los puertos UDP 'extra' (123 NTP-like, 161 SNMP-like).",
+  "_comentario3": "El 53/udp+tcp lo sirve dnsmasq REAL (no portsrv); por eso aqui NO aparece el 53.",
+  "_didactica": "UDP es lento de escanear (-sU) porque, sin respuesta, nmap no distingue 'open' de 'filtered' y debe reintentar con timeouts. Estos dos puertos SI responden un datagrama, lo que ayuda a verlos como 'open'.",
+  "default_close_ms": 1500,
+  "ports": [
+    {
+      "_nota": "123/udp: NTP-like. Banner de texto a modo de pista (no es NTP binario real). Responder algo ayuda a que -sU lo marque 'open' en vez de 'open|filtered'.",
+      "port": 123,
+      "proto": "udp",
+      "mode": "banner",
+      "banner": "ntpd 4.2 :: Network Time Protocol (simulado) :: stratum 3\n"
+    },
+    {
+      "_nota": "161/udp: SNMP-like. Comunidad por defecto 'public'. Banner didactico para practicar enumeracion SNMP (la community 'public' es un clasico).",
+      "port": 161,
+      "proto": "udp",
+      "mode": "banner",
+      "banner": "snmp :: community=public :: SNMPv2c (simulado)\n"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de servicio — nginx</title>
+  <style>
+    body { font-family: ui-monospace, "Courier New", monospace; background:#06120c;
+           color:#bff0cf; margin:0; }
+    header { background:#0c2017; padding:1.5rem 2rem; border-bottom:2px solid #2f8f5b; }
+    h1 { margin:0; color:#5fe39a; }
+    main { max-width:720px; margin:2rem auto; padding:0 1.5rem; line-height:1.6; }
+    .badge { display:inline-block; background:#0c2017; border:1px solid #2f8f5b;
+             color:#5fe39a; padding:.3rem .7rem; border-radius:6px; font-weight:bold; }
+    table { border-collapse:collapse; margin:1.5rem 0; width:100%; }
+    th, td { border:1px solid #1f4d36; padding:.5rem .8rem; text-align:left; }
+    th { background:#0c2017; color:#5fe39a; }
+    code { color:#9fffd0; }
+    footer { text-align:center; color:#3f6b53; padding:2rem; font-size:.85rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>&#9881; Panel de servicio</h1>
+    <p>Estado del frontend web de <strong>RECON Corp</strong> (host
+       <code>alpha</code>, puerto 8080)</p>
+  </header>
+
+  <main>
+    <p>Servidor web en ejecucion:
+       <span class="badge">nginx</span></p>
+
+    <p>Este panel sirve para identificar el software que atiende las peticiones
+       HTTP. El servidor que ves &mdash; tanto en el puerto 80 como en este
+       8080 &mdash; es <strong>nginx</strong>.</p>
+
+    <table>
+      <tr><th>Parametro</th><th>Valor</th></tr>
+      <tr><td>Software del servidor</td><td><code>nginx</code></td></tr>
+      <tr><td>Vhost principal</td><td><code>alpha:80</code></td></tr>
+      <tr><td>Vhost panel</td><td><code>alpha:8080</code></td></tr>
+      <tr><td>Estado</td><td><code>online</code></td></tr>
+    </table>
+
+    <p>&#128161; Sugerencia: la cabecera HTTP <code>Server:</code> tambien
+       delata el software. Pruebalo con <code>curl -I http://alpha/</code> o
+       con <code>nmap -sV</code>. La respuesta de la mision de version es,
+       sencillamente, <strong>nginx</strong>.</p>
+  </main>
+
+  <footer>
+    RECON Corp &mdash; Panel nginx &middot; "Operacion Red Recon" &middot; uso educativo.
+  </footer>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{# Tabla de ranking reutilizable. Recibe `leaderboard` (lista de dicts). #}
+{% if leaderboard %}
+<table class="board">
+  <thead>
+    <tr>
+      <th class="pos">#</th>
+      <th>callsign</th>
+      <th class="num">pts</th>
+      <th class="num">flags</th>
+      <th>rango</th>
+      <th>insignias</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in leaderboard %}
+    <tr class="{{ 'me' if row.callsign == callsign else '' }}">
+      <td class="pos">
+        {% if loop.index == 1 %}<span class="medal gold">1</span>
+        {% elif loop.index == 2 %}<span class="medal silver">2</span>
+        {% elif loop.index == 3 %}<span class="medal bronze">3</span>
+        {% else %}{{ loop.index }}{% endif %}
+      </td>
+      <td class="cs">@{{ row.callsign }}</td>
+      <td class="num">{{ row.points }}</td>
+      <td class="num">{{ row.flags }}</td>
+      <td><span class="rank-chip">{{ row.rank }}</span></td>
+      <td class="badges">
+        {% for b in row.badges %}<span class="badge b-{{ b }}">{{ b }}</span>{% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">Sin operadores registrados todavía. Sé el primero en autenticarte.</p>
+{% endif %}

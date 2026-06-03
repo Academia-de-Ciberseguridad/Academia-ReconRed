@@ -1,0 +1,71 @@
+=============================================================================
+ OBJETIVO ECHO (172.30.0.25) — Deteccion de SO / TTL
+ Nota para el INSTRUCTOR (no es un objetivo del alumno).
+=============================================================================
+
+Esta maquina ensena "nmap -O" (fingerprint de SO) y la inferencia de SO por
+TTL, pero sobre todo ensena SUS LIMITES dentro de Docker.
+
+-----------------------------------------------------------------------------
+LIMITE CLAVE: el kernel compartido
+-----------------------------------------------------------------------------
+En Docker, TODOS los contenedores comparten el kernel del HOST. No hay un
+kernel "Windows" ni un kernel "Linux" por contenedor: la pila TCP/IP que
+responde a las sondas de nmap es la del host. Por tanto:
+
+  - "nmap -O" fingerprintea el KERNEL DEL HOST (Linux), no el "SO" del
+    contenedor. Si lanzas -O contra echo veras un fingerprint de Linux, lo
+    cual es CORRECTO a nivel de pila pero ENGANOSO a nivel pedagogico.
+  - Por eso aqui NO confiamos en -O para decidir el SO. Ensenamos la otra
+    senal clasica: el TTL inicial del paquete.
+
+-----------------------------------------------------------------------------
+INFERENCIA POR TTL (la leccion real de echo)
+-----------------------------------------------------------------------------
+El campo TTL del paquete de respuesta empieza en un valor tipico segun el SO
+de origen y se decrementa en 1 por cada salto (router) atravesado. Valores
+iniciales habituales:
+
+  TTL ~128  => Windows           (este contenedor: forzado a 128)
+  TTL ~64   => Linux / Unix / macOS
+  TTL ~255  => equipos de red (routers, switches, algunos *BSD/dispositivos)
+
+Como pista, observa el TTL de las respuestas (p.ej. con "ping" o mirando la
+columna TTL en una captura/escaneo). Este contenedor reescribe el TTL de TODO
+su trafico de salida a 128 mediante:
+
+    iptables -t mangle -A OUTPUT -j TTL --ttl-set 128
+
+Combinado con los puertos "Windows-like" abiertos, la conclusion correcta es
+que el SO sugerido es WINDOWS.
+
+NOTA: como los contenedores estan en la misma red (0 saltos intermedios), el
+TTL que vera el atacante sera muy cercano a 128. Si hubiera routers de por
+medio, restaria 1 por salto (p.ej. 128 - 2 = 126); la inferencia se hace
+redondeando al valor inicial tipico mas cercano por arriba (64/128/255).
+
+-----------------------------------------------------------------------------
+Puertos abiertos (portsrv, banners "Windows-like")
+-----------------------------------------------------------------------------
+  135/tcp   OPEN   Microsoft RPC Endpoint Mapper (msrpc-like).
+  139/tcp   OPEN   NetBIOS Session Service (netbios-ssn-like).
+  445/tcp   OPEN   SMB sobre TCP (microsoft-ds-like). Su banner ENTREGA el
+                   flag de M08 y alude a SMB/Windows y al TTL=128.
+                   Flag: RECON{ttl_128_w1nd0ws_v1b3s}
+
+El trio 135/139/445 es la "firma" clasica de un host Windows; refuerza la
+conclusion a la que tambien apunta el TTL.
+
+-----------------------------------------------------------------------------
+Pistas didacticas
+-----------------------------------------------------------------------------
+  - "nmap -O echo" -> fingerprint del kernel del HOST (Linux). Explica por que
+    NO debemos fiarnos de -O en contenedores y por que el TTL es mas util aqui.
+  - Usa "-Pn" si el host discovery se complica (hay cap NET_ADMIN en juego).
+  - Mira el TTL de las respuestas: ~128 confirma la pista de "Windows".
+  - El trio de puertos SMB/NetBIOS/RPC (135/139/445) corrobora el veredicto.
+
+Misiones asociadas:
+  M08 (answer): windows   (SO sugerido por TTL=128 + puertos Windows-like)
+  M08 (flag):   RECON{ttl_128_w1nd0ws_v1b3s}  (banner de 445/tcp)
+=============================================================================

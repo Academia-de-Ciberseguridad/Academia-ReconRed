@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RECON Corp — Portal corporativo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background:#0b1021; color:#d7e0f5;
+           margin:0; padding:0; }
+    header { background:#11183a; padding:2rem; border-bottom:2px solid #3a5bd9; }
+    h1 { margin:0; color:#7da2ff; letter-spacing:2px; }
+    main { max-width:760px; margin:2rem auto; padding:0 1.5rem; line-height:1.6; }
+    .card { background:#141c44; border:1px solid #25336e; border-radius:10px;
+            padding:1.5rem; margin:1.5rem 0; }
+    code { background:#0b1021; padding:.15rem .4rem; border-radius:4px;
+           color:#9fd7ff; }
+    a { color:#7da2ff; }
+    footer { text-align:center; color:#5c6aa0; padding:2rem; font-size:.85rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RECON&nbsp;CORP</h1>
+    <p>Infraestructura corporativa &mdash; entorno de laboratorio</p>
+  </header>
+
+  <main>
+    <p>Bienvenido al portal interno de <strong>RECON Corp</strong>. Este host
+       (<code>alpha</code>) expone varios servicios de cara a la red interna.</p>
+
+    <div class="card">
+      <h2>Servicios publicados</h2>
+      <ul>
+        <li><strong>SSH</strong> (administracion remota) &mdash; puerto 22.</li>
+        <li><strong>Web corporativa</strong> &mdash; puerto 80 (estas aqui).</li>
+        <li><strong>Panel</strong> de servicio &mdash; puerto
+            <code>8080</code>.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Pistas para el operador de reconocimiento</h2>
+      <p>&#128270; &iquest;Quieres saber <em>que</em> servidor web y <em>que</em>
+         version sirve estas paginas? Echa un vistazo al
+         <a href="http://alpha:8080/">panel del puerto 8080</a>: alli el
+         servicio se identifica de forma evidente.</p>
+      <p>&#129534; Y como en todo sitio que se precie, hay un
+         <a href="/robots.txt"><code>/robots.txt</code></a> &mdash; a veces
+         esconde mas de lo que deberia&hellip;</p>
+    </div>
+  </main>
+
+  <footer>
+    RECON Corp &mdash; Laboratorio "Operacion Red Recon" &middot; uso educativo.
+  </footer>
+</body>
+</html>

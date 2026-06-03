@@ -1,0 +1,38 @@
+
+# ===========================================================================
+# Operación Red Recon — personalización de la shell del ATACANTE
+# (añadido a /root/.bashrc y /etc/bash.bashrc durante el build)
+# ===========================================================================
+
+# Solo en shells interactivas (evita romper scripts y `docker exec ... cmd`).
+case $- in
+    *i*)
+        # --- Banner de bienvenida: muestra el motd al abrir la shell --------
+        if [ -r /etc/motd ]; then
+            cat /etc/motd
+        fi
+
+        # --- Prompt con color / tema "hacker" ------------------------------
+        # Verde brillante para el usuario@host, cian para el cwd. Sobrio.
+        PS1='\[\033[01;32m\]\u@recon\[\033[00m\]:\[\033[01;36m\]\w\[\033[00m\]\$ '
+
+        # Colores en ls/grep para legibilidad.
+        export LS_OPTIONS='--color=auto'
+        alias ls='ls --color=auto'
+        alias grep='grep --color=auto'
+
+        # --- Alias útiles de la estación -----------------------------------
+        alias ll='ls -alhF'
+        alias la='ls -A'
+        alias ping='ping -c4'                       # 4 paquetes por defecto
+        alias sweep='nmap -sn 172.30.0.0/24'        # barrido de host discovery
+        alias help='recon-help'                     # chuleta de comandos
+        alias targets='recon-targets'               # tabla de objetivos
+        alias scoreboard='echo "Scoreboard: http://localhost:8080 (host) | http://172.30.0.5:8000 (interno)"'
+
+        # Recordatorio discreto de los helpers disponibles.
+        echo
+        echo "  -> Escribe 'recon-help' para la chuleta, 'recon-targets' para las IPs, 'sweep' para barrer la red."
+        echo
+        ;;
+esac

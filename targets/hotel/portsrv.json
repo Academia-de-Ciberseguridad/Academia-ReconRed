@@ -1,0 +1,22 @@
+{
+  "_comentario": "Objetivo HOTEL (172.30.0.27) — hping3 / cabeceras TCP (SYN/ACK/FIN, win, TTL).",
+  "_comentario2": "portsrv solo ABRE los puertos que deben quedar OPEN: 22 y 7777.",
+  "_comentario3": "Un OPEN responde SYN/ACK a un SYN entrante (lo aporta el kernel al estar el puerto en LISTEN).",
+  "_comentario4": "80 queda CLOSED (nadie escucha, sin regla -> el kernel responde RST).",
+  "_comentario5": "443 queda FILTERED via iptables DROP (lo aplica entrypoint.sh) -> sin respuesta.",
+  "default_close_ms": 1500,
+  "ports": [
+    {
+      "_nota": "Puerto OPEN clasico: banner SSH-like. A nivel TCP responde SYN/ACK al SYN del alumno.",
+      "port": 22,
+      "mode": "banner",
+      "banner": "SSH-2.0-OpenSSH_8.9p1 Debian-recon\r\n"
+    },
+    {
+      "_nota": "Puerto OPEN de recompensa (M10). Su banner entrega el flag tras enumerar con hping3.",
+      "port": 7777,
+      "mode": "banner",
+      "banner": "recon-lab packet-forge :: RECON{h4ndcr4ft3d_p4ck3ts}\r\n"
+    }
+  ]
+}

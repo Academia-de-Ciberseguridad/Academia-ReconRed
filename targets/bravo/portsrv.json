@@ -1,0 +1,20 @@
+{
+  "_comentario": "Objetivo BRAVO (172.30.0.22) - banners simulados para nmap -sV.",
+  "_comentario2": "redis (6379/tcp) es REAL y lo sirve redis-server, no portsrv.",
+  "_comentario3": "portsrv solo simula los banners de MySQL (3306) y PostgreSQL (5432).",
+  "default_close_ms": 1500,
+  "ports": [
+    {
+      "_nota": "Banner tipo handshake MySQL: tras el byte de protocolo (0x0a) va la cadena de version 5.7.40-recon, para que nmap -sV lo clasifique como mysql 5.7.x.",
+      "port": 3306,
+      "mode": "banner",
+      "banner": "\n5.7.40-recon recon-lab mysql_native_password "
+    },
+    {
+      "_nota": "Banner plausible de PostgreSQL (mensaje de error tipico ante un saludo no valido).",
+      "port": 5432,
+      "mode": "banner",
+      "banner": "EFATAL:  PostgreSQL 14.7 (recon-lab) - conexion no soportada en este puerto de laboratorio\r\n"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# robots.txt — RECON Corp
+# Directivas para crawlers. Algunas rutas estan ocultas a la indexacion...
+# pero "oculto" no es lo mismo que "secreto". Mira bien este fichero.
+# RECON{w3b_r3con_h0st_alph4}
+
+User-agent: *
+Disallow: /admin/
+Disallow: /backup/
+Disallow: /internal/
+Disallow: /panel/
+Disallow: /private/
+Disallow: /.git/
+Disallow: /config/

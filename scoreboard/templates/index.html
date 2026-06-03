@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Acceso :: Red Recon{% endblock %}
+
+{% block content %}
+<section class="banner">
+<pre class="ascii" aria-hidden="true">
+ ____  _____ ____    ____  _____ ____ ___  _   _
+|  _ \| ____|  _ \  |  _ \| ____/ ___/ _ \| \ | |
+| |_) |  _| | | | | | |_) |  _|| |  | | | |  \| |
+|  _ <| |___| |_| | |  _ <| |__| |__| |_| | |\  |
+|_| \_\_____|____/  |_| \_\_____\____\___/|_| \_|
+</pre>
+  <p class="tagline">// unidad de reconocimiento · plataforma de operaciones //</p>
+</section>
+
+{% if not full_board %}
+<section class="grid-2">
+  <div class="panel">
+    <h2 class="panel-h">&gt; iniciar_sesión</h2>
+    {% if callsign %}
+      <p class="ok-line">Sesión activa como <strong>@{{ callsign }}</strong>.</p>
+      <a class="btn" href="{{ url_for('missions') }}">ENTRAR AL TABLERO &raquo;</a>
+    {% else %}
+      <p class="muted small">
+        Introduce tu <em>callsign</em> (alias de operador). Sin contraseña:
+        es un laboratorio aislado. Tu progreso se guarda bajo ese alias.
+      </p>
+      <form class="login-form" method="post" action="{{ url_for('login') }}">
+        <label for="callsign">callsign:</label>
+        <div class="input-row">
+          <span class="prompt-inline">&gt;</span>
+          <input type="text" id="callsign" name="callsign"
+                 maxlength="32" autocomplete="off" spellcheck="false"
+                 placeholder="ej. n0v4, gh0st-7..." required autofocus>
+        </div>
+        <button class="btn" type="submit">AUTENTICAR</button>
+      </form>
+    {% endif %}
+    <p class="muted small mono">
+      misiones disponibles: {{ total_missions }} · objetivo final: RECON&#123;...&#125;
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-h">&gt; leaderboard <span class="muted">(top 20)</span></h2>
+    {% include "_leaderboard.html" %}
+    <a class="link-more" href="{{ url_for('leaderboard') }}">ver ranking completo &raquo;</a>
+  </div>
+</section>
+{% else %}
+<section class="panel">
+  <h2 class="panel-h">&gt; ranking_completo</h2>
+  {% include "_leaderboard.html" %}
+</section>
+{% endif %}
+{% endblock %}

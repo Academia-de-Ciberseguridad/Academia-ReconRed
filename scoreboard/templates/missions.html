@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Misiones :: Red Recon{% endblock %}
+
+{% block content %}
+<section class="status-bar panel">
+  <div class="status-id">
+    <span class="muted">operador:</span> <strong>@{{ callsign }}</strong>
+    <span class="rank-chip big">{{ rank }}</span>
+  </div>
+  <div class="status-stats">
+    <span class="stat"><span class="muted">pts</span> {{ points }}</span>
+    <span class="stat"><span class="muted">misiones</span> {{ solved_count }}/{{ total_missions }}</span>
+  </div>
+  <div class="progress-wrap"
+       data-progress="{{ progress_pct }}"
+       title="{{ solved_count }} de {{ total_missions }} misiones">
+    <div class="progress-bar" style="width: {{ progress_pct }}%;"></div>
+    <span class="progress-label">{{ progress_pct }}%</span>
+  </div>
+  {% if next_threshold %}
+    <p class="muted small">
+      siguiente rango en <strong>{{ next_threshold - points }}</strong> pts ·
+      umbral {{ next_threshold }}
+    </p>
+  {% else %}
+    <p class="ok-line small">RANGO MÁXIMO ALCANZADO — Maestro Recon.</p>
+  {% endif %}
+</section>
+
+<h2 class="section-h">&gt; tablero_de_misiones</h2>
+
+<section class="cards">
+  {% for c in cards %}
+  <article class="card state-{{ c.state }}">
+    <header class="card-h">
+      <span class="mid">{{ c.id }}</span>
+      <span class="card-state">
+        {% if c.state == 'solved' %}<span class="tag t-solved">RESUELTA</span>
+        {% elif c.state == 'available' %}<span class="tag t-open">DISPONIBLE</span>
+        {% else %}<span class="tag t-locked">BLOQUEADA</span>{% endif %}
+      </span>
+    </header>
+    <h3 class="card-title">{{ c.title }}</h3>
+    <p class="card-cat">{{ c.category }}</p>
+    <div class="card-meta">
+      <span class="pts">{{ c.points }} pts</span>
+      <span class="hints">{{ c.n_hints }} hint{{ 's' if c.n_hints != 1 }}</span>
+    </div>
+    {% if c.state == 'locked' and c.missing %}
+      <p class="locked-note muted small">
+        requiere: {{ c.missing | join(', ') }}
+      </p>
+    {% endif %}
+    <a class="card-link" href="{{ url_for('mission', mid=c.id) }}">
+      {% if c.state == 'solved' %}revisar &raquo;
+      {% elif c.state == 'available' %}abrir briefing &raquo;
+      {% else %}inspeccionar &raquo;{% endif %}
+    </a>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

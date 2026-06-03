@@ -1,0 +1,27 @@
+{
+  "_comentario": "Objetivo ECHO (172.30.0.25) — deteccion de SO por puertos y TTL.",
+  "_comentario2": "Banners 'Windows-like' (135 msrpc, 139 netbios, 445 SMB) para sugerir SO.",
+  "_comentario3": "El flag de M08 viaja en el banner de 445/tcp; el TTL=128 lo fuerza entrypoint.sh.",
+  "_comentario4": "Pista pedagogica: TTL 128 => Windows, 64 => Linux, 255 => equipos de red.",
+  "default_close_ms": 1500,
+  "ports": [
+    {
+      "_nota": "135/tcp: Microsoft RPC Endpoint Mapper. Banner msrpc-like para -sV.",
+      "port": 135,
+      "mode": "banner",
+      "banner": "msrpc :: Microsoft Windows RPC Endpoint Mapper ready\r\n"
+    },
+    {
+      "_nota": "139/tcp: NetBIOS Session Service. Banner netbios-like para -sV.",
+      "port": 139,
+      "mode": "banner",
+      "banner": "netbios-ssn :: Microsoft Windows NetBIOS Session Service\r\n"
+    },
+    {
+      "_nota": "445/tcp: SMB sobre TCP. Banner Windows/SMB-like CON el flag de M08.",
+      "port": 445,
+      "mode": "banner",
+      "banner": "microsoft-ds :: Windows SMB (TTL=128) :: RECON{ttl_128_w1nd0ws_v1b3s}\r\n"
+    }
+  ]
+}

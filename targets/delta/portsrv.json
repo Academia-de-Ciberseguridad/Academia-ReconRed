@@ -1,0 +1,21 @@
+{
+  "_comentario": "Objetivo DELTA (172.30.0.24) - Ruido/decoys/timing (mision M07).",
+  "_comentario2": "50 puertos decoy identicos (9000-9049) mas 1 puerto real distinto (9042).",
+  "_comentario3": "La entrada concreta de 9042 GANA sobre el rango (ver portsrv.py: los puertos concretos sobrescriben al port_range que los contiene).",
+  "_didactica": "50 puertos abiertos ralentizan un -sV ingenuo. El alumno debe acotar el ruido (p.ej. filtrar por el banner distinto) para separar la senal del ruido.",
+  "default_close_ms": 1500,
+  "ports": [
+    {
+      "_nota": "Mar de 50 decoys identicos. Todos comparten el mismo banner generico para que parezcan intercambiables y obliguen a optimizar el escaneo.",
+      "port_range": [9000, 9049],
+      "mode": "banner",
+      "banner": "decoy-service v0.1 // nada que ver aqui\r\n"
+    },
+    {
+      "_nota": "La AGUJA en el pajar: unico puerto real/distinto. Su entrada concreta gana al rango anterior. Banner distintivo con el flag de M07.",
+      "port": 9042,
+      "mode": "banner",
+      "banner": "real-service v1.0 // ESTE es el servicio REAL (no es un decoy) -- flag M07: RECON{n33dl3_1n_th3_st4ck}\r\n"
+    }
+  ]
+}

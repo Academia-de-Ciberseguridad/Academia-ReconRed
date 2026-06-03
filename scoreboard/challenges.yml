@@ -1,0 +1,261 @@
+# =====================================================================
+# Operación Red Recon — Catálogo de misiones (fuente: LAB-SPEC §3 y §4)
+# ---------------------------------------------------------------------
+# Cada misión:
+#   id        identificador (M01..M12)
+#   title     título inmersivo
+#   category  agrupación pedagógica
+#   points    puntos al resolver
+#   target    objetivo (host / IP / puerto) — informativo
+#   brief     briefing de la unidad de reconocimiento (texto/markdown simple)
+#   hints     pistas progresivas (orientan al comando, NO dan el flag)
+#   type      flag | answer
+#   flag      valor exacto (si type=flag)
+#   accept    lista de respuestas válidas (si type=answer; case-insensitive)
+#   requires  prerequisitos (lista de ids), opcional
+#   badge     insignia concedida al resolver, opcional
+# Los valores canónicos NO se tocan: son el contrato del laboratorio.
+# =====================================================================
+
+challenges:
+
+  # ----------------------------------------------------------------- M01
+  - id: M01
+    title: "Primer Contacto"
+    category: "Host Discovery"
+    points: 50
+    target: "Subred 172.30.0.0/24 (desde attacker 172.30.0.10)"
+    brief: |
+      Acabas de desplegarte en territorio desconocido. Antes de elegir un blanco,
+      la unidad necesita un censo: ¿cuántas máquinas están realmente VIVAS en la
+      subred del laboratorio? Realiza un barrido de descubrimiento de hosts
+      (ping sweep) y reporta el número de equipos que responden.
+
+      Cuidado con la aritmética de red: la dirección de red, la de broadcast y la
+      pasarela (gateway) no son "objetivos" del ejercicio, aunque alguna pueda
+      responder. Cuenta los hosts realmente operativos.
+    hints:
+      - "Un barrido sin escaneo de puertos: `nmap -sn 172.30.0.0/24`."
+      - "Usa la flag `-sn` (ping scan) para no tocar puertos. Cuenta las líneas 'Host is up'."
+      - "nmap reportará 10 'hosts up': te incluye a TI (172.30.0.10) y a la pasarela (172.30.0.1), además del scoreboard. Según qué incluyas, la respuesta válida está entre 7 y 10."
+    type: answer
+    accept: ["7", "8", "9", "10"]
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M02
+  - id: M02
+    title: "Puertas Abiertas"
+    category: "Web Recon"
+    points: 100
+    target: "alpha (172.30.0.21) — 80/tcp"
+    brief: |
+      El host ALPHA expone un servidor web. Las webs siempre dejan migajas: ficheros
+      de control, cabeceras reveladoras... Localiza el servicio HTTP, inspecciona sus
+      cabeceras de respuesta y los recursos "para robots" que casi nadie mira.
+      Extrae la credencial de reconocimiento (formato `RECON{...}`).
+    hints:
+      - "Descubre el puerto 80 y mira el `/robots.txt`: `curl http://172.30.0.21/robots.txt`."
+      - "Las cabeceras también hablan: `curl -I http://172.30.0.21/` y busca `X-Recon-Flag`."
+      - "El flag aparece tanto en `/robots.txt` como en la cabecera `X-Recon-Flag`."
+    type: flag
+    flag: "RECON{w3b_r3con_h0st_alph4}"
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M03
+  - id: M03
+    title: "Identidades"
+    category: "Service & Version Detection"
+    points: 100
+    target: "alpha (172.30.0.21) — 80/tcp"
+    brief: |
+      Conocer el puerto no basta: hay que saber QUÉ corre detrás. La detección de
+      versión interroga al servicio para arrancarle su identidad. Determina qué
+      software sirve el puerto 80 de ALPHA y reporta el nombre del servicio (una
+      sola palabra, en minúsculas).
+    hints:
+      - "Detección de versión: `nmap -sV -p80 172.30.0.21`."
+      - "Fíjate en la columna SERVICE/VERSION del resultado."
+      - "La respuesta es el nombre del servidor web (una palabra)."
+    type: answer
+    accept: ["nginx"]
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M04
+  - id: M04
+    title: "El Tesoro de Redis"
+    category: "Service Interaction"
+    points: 150
+    target: "bravo (172.30.0.22) — 6379/tcp"
+    brief: |
+      BRAVO ejecuta un Redis sin autenticación: un descuido clásico. Un servicio
+      que habla es un servicio que se puede interrogar. Conéctate, enumera y extrae
+      el valor de la clave `flag`.
+    hints:
+      - "Identifica 6379/tcp (redis) con `nmap -sV -p6379 172.30.0.22`."
+      - "Interactúa: `redis-cli -h 172.30.0.22` y prueba `KEYS *`."
+      - "El botín está en `GET flag`."
+    type: flag
+    flag: "RECON{r3d1s_k3y_l00t3d}"
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M05
+  - id: M05
+    title: "Estados Cuánticos"
+    category: "Port States"
+    points: 150
+    target: "charlie (172.30.0.23) — 31337/tcp"
+    brief: |
+      CHARLIE esconde una puerta entre un muro de puertos filtrados. La mayoría de
+      sus puertos están cerrados o filtrados por el cortafuegos, pero uno muy alto
+      permanece ABIERTO y disimulado. Encuéntralo y lee el banner que entrega.
+    hints:
+      - "No te quedes en los puertos comunes: escanea el rango alto. `nmap -p- 172.30.0.23`."
+      - "Busca un puerto 'open' poco habitual entre 'filtered' (pista: 31337)."
+      - "Lee el banner del puerto abierto: `nmap -sV -p31337 172.30.0.23` o `ncat 172.30.0.23 31337`."
+    type: flag
+    flag: "RECON{f1lt3r3d_d00r_0p3n3d}"
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M06
+  - id: M06
+    title: "Cortafuegos al Desnudo"
+    category: "Firewall Analysis"
+    points: 150
+    target: "charlie (172.30.0.23) — 443/tcp"
+    brief: |
+      Un buen analista distingue un puerto CERRADO de uno FILTRADO: el primero te
+      manda un RST, el segundo se traga tus paquetes en silencio (DROP). Analiza el
+      puerto 443 de CHARLIE y reporta su estado exacto según nmap.
+    hints:
+      - "Compara estados: `nmap -p80,443 172.30.0.23` y observa la columna STATE."
+      - "Si nmap no recibe respuesta (ni RST ni SYN/ACK), el estado no es 'closed'."
+      - "La respuesta es el término que usa nmap para 'sin respuesta por DROP'."
+    type: answer
+    accept: ["filtered"]
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M07
+  - id: M07
+    title: "Aguja en el Pajar"
+    category: "Noise & Decoys"
+    points: 200
+    target: "delta (172.30.0.24) — 9000-9049/tcp"
+    brief: |
+      DELTA es ruido puro: cincuenta puertos señuelo idénticos para saturar tu
+      escaneo. Pero uno de ellos NO es como los demás: su banner es distinto y
+      guarda el premio. Enumera el rango, compara banners y aísla la aguja.
+    hints:
+      - "Escanea el rango con detección de versión: `nmap -sV -p9000-9049 172.30.0.24`."
+      - "Casi todos devuelven el mismo banner 'decoy'. Busca el que difiere."
+      - "El puerto distinto está dentro del rango (pista: 9042). Lee su banner."
+    type: flag
+    flag: "RECON{n33dl3_1n_th3_st4ck}"
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M08
+  - id: M08
+    title: "Huella Digital"
+    category: "OS / TTL Fingerprinting"
+    points: 150
+    target: "echo (172.30.0.25) — 135/139/445 + TTL"
+    brief: |
+      Todo sistema deja una huella. El TTL de los paquetes de respuesta y los
+      puertos abiertos delatan la familia de sistema operativo. ECHO responde con
+      un TTL muy concreto y abre puertos típicos de su estirpe. ¿Qué SO sugiere?
+      Reporta la familia (una palabra).
+    hints:
+      - "Mira el TTL y los puertos: `nmap -O 172.30.0.25` o `ping`/`hping3` para ver el TTL."
+      - "Un TTL de salida cercano a 128 y los puertos 135/139/445 apuntan a una familia concreta."
+      - "La respuesta es el nombre de esa familia de SO (una palabra)."
+    type: answer
+    accept: ["windows"]
+    badge: null
+    requires: []
+
+  # ----------------------------------------------------------------- M09
+  - id: M09
+    title: "Territorio UDP"
+    category: "UDP & DNS"
+    points: 200
+    target: "foxtrot (172.30.0.26) — 53/udp+tcp"
+    brief: |
+      El mundo no es solo TCP. FOXTROT sirve DNS para la zona `recon.lab`. Los
+      registros TXT son un cajón de sastre donde se esconden secretos. Enumera el
+      DNS y recupera el registro TXT de `flag.recon.lab`.
+    hints:
+      - "Confirma 53/udp: `nmap -sU -p53 172.30.0.26`."
+      - "Consulta el TXT: `dig @172.30.0.26 flag.recon.lab TXT`."
+      - "También puedes usar NSE: `nmap -sU -p53 --script dns-* 172.30.0.26`. El flag está en el TXT."
+    type: flag
+    flag: "RECON{udp_dns_txt_3num3r4t3d}"
+    badge: "udp-diver"
+    requires: []
+
+  # ----------------------------------------------------------------- M10
+  - id: M10
+    title: "El Arte del Paquete"
+    category: "Packet Crafting (hping3)"
+    points: 250
+    target: "hotel (172.30.0.27) — 7777/tcp"
+    brief: |
+      HOTEL solo entrega su secreto a quien domina las cabeceras TCP. Forja
+      paquetes a mano con hping3, observa qué responde cada puerto (SYN/ACK, RST o
+      silencio) y descubre el puerto abierto de alta numeración que guarda el flag.
+    hints:
+      - "Sonda con hping3 en modo SYN: `hping3 -S -p 7777 172.30.0.27 -c 3`."
+      - "Un puerto abierto responde SYN/ACK (flags SA); uno cerrado, RST (flag R); uno filtrado, nada."
+      - "El puerto 7777 está abierto y su banner contiene el flag: `ncat 172.30.0.27 7777`."
+    type: flag
+    flag: "RECON{h4ndcr4ft3d_p4ck3ts}"
+    badge: "packet-smith"
+    requires: []
+
+  # ----------------------------------------------------------------- M11
+  - id: M11
+    title: "Operación Sigilo"
+    category: "Evasion"
+    points: 200
+    target: "charlie / hotel — reglas de filtrado"
+    brief: |
+      Los cortafuegos confían en ciertos puertos de origen y se confunden con
+      paquetes fragmentados. La evasión clásica fija el puerto de origen a uno
+      "mágico" (típicamente DNS) o fragmenta las sondas para atravesar las reglas.
+      ¿Qué número de puerto de origen es el truco canónico de evasión? Repórtalo.
+    hints:
+      - "Prueba a fijar el puerto de origen: `nmap --source-port 53 ...` o `-g 53`."
+      - "El puerto mágico clásico está asociado al servicio DNS."
+      - "Algunos firewalls también dejan pasar 20/21 (FTP-data/control): se aceptan como respuesta."
+    type: answer
+    accept: ["53", "21", "20"]
+    badge: "ghost"
+    requires: []
+
+  # ----------------------------------------------------------------- M12
+  - id: M12
+    title: "BOSS — Mapa Total"
+    category: "Boss"
+    points: 500
+    target: "Toda la subred — síntesis final"
+    brief: |
+      Reconocimiento completado, operador. Has cartografiado web, servicios,
+      estados de puerto, firewall, señuelos, huella de SO, UDP/DNS y paquetes
+      forjados a mano. Cuando hayas resuelto las misiones requeridas, el Mando
+      desclasificará el FLAG MAESTRO. Reenvíalo aquí para cerrar la operación y
+      ganar el rango de Cartógrafo.
+
+      Requisitos: M02, M04, M05, M07, M08, M09 y M10.
+    hints:
+      - "Completa las misiones requeridas para desbloquear el flag maestro."
+      - "El scoreboard te mostrará el flag aquí mismo en cuanto cumplas los requisitos."
+      - "Ritual de cierre: copia el flag maestro revelado y reenvíalo en este formulario."
+    type: flag
+    flag: "RECON{m4st3r_r3c0n_c0mpl3t3}"
+    badge: "cartographer"
+    requires: ["M02", "M04", "M05", "M07", "M08", "M09", "M10"]

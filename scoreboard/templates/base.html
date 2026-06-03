@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Operación Red Recon{% endblock %} :: SCOREBOARD</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="crt">
+    <header class="topbar">
+      <a class="brand" href="{{ url_for('index') }}">
+        <span class="prompt">root@recon</span><span class="sep">:~#</span>
+        <span class="brandname">OPERACIÓN&nbsp;RED&nbsp;RECON</span>
+      </a>
+      <nav class="nav">
+        {% if callsign %}
+          <a href="{{ url_for('missions') }}">[ misiones ]</a>
+          <a href="{{ url_for('leaderboard') }}">[ ranking ]</a>
+          <a href="{{ url_for('profile') }}">[ perfil ]</a>
+          <span class="who">@{{ callsign }}</span>
+          <a class="danger" href="{{ url_for('logout') }}">[ salir ]</a>
+        {% else %}
+          <a href="{{ url_for('leaderboard') }}">[ ranking ]</a>
+          <span class="who muted">sin sesión</span>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <span class="blink">&#9608;</span>
+      <span class="muted">laboratorio educativo aislado · uso defensivo · 172.30.0.0/24</span>
+    </footer>
+  </div>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

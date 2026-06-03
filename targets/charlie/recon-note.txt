@@ -1,0 +1,45 @@
+=============================================================================
+ OBJETIVO CHARLIE (172.30.0.23) — Estados de puerto / firewall
+ Nota para el INSTRUCTOR (no es un objetivo del alumno).
+=============================================================================
+
+Esta maquina ensena la diferencia entre los tres estados que reporta nmap:
+OPEN, CLOSED y FILTERED. Util para practicar -Pn, --reason y el ACK scan (-sA).
+
+Estado esperado de cada puerto:
+
+  22/tcp    OPEN      portsrv escucha. Banner SSH-like (SSH-2.0-OpenSSH_8.9p1).
+                      --reason: syn-ack.
+
+  31337/tcp OPEN      portsrv escucha. Banner con el flag de M05, "escondido"
+                      entre los puertos filtrados. --reason: syn-ack.
+                      Flag: RECON{f1lt3r3d_d00r_0p3n3d}
+
+  80/tcp    CLOSED    Nadie escucha y NO hay regla iptables -> el kernel
+                      responde con RST. --reason: reset.
+                      (Deliberadamente NO se filtra para que el contraste
+                      closed vs filtered sea visible.)
+
+  443/tcp   FILTERED  iptables DROP en INPUT -> sin respuesta. Es el puerto de
+                      la leccion (M06: el estado de 443 es "filtered").
+                      --reason: no-response.
+
+  8000/tcp  FILTERED  iptables DROP. Ruido para practicar --reason.
+  3389/tcp  FILTERED  iptables DROP. Ruido para practicar --reason.
+  5900/tcp  FILTERED  iptables DROP. Ruido para practicar --reason.
+
+-----------------------------------------------------------------------------
+Pistas didacticas:
+  - Sin -Pn, si el host parece "down", recuerdalo: aqui hay caps NET_ADMIN y
+    reglas DROP que pueden confundir al host discovery. Usa -Pn.
+  - "nmap --reason" muestra POR QUE nmap asigna cada estado (syn-ack, reset,
+    no-response), que es la clave para distinguir closed de filtered.
+  - "nmap -sA" (ACK scan) clasifica los puertos como "unfiltered" (hay RST) o
+    "filtered" (sin respuesta), mapeando el comportamiento del cortafuegos.
+  - 31337 es OPEN pero queda diluido entre los DROP: ensena a no fiarse de un
+    escaneo superficial y a revisar todo el rango.
+
+Misiones asociadas:
+  M05 (flag): RECON{f1lt3r3d_d00r_0p3n3d}  (banner de 31337/tcp)
+  M06 (answer): filtered                   (estado de 443/tcp en charlie)
+=============================================================================

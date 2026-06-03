@@ -1,0 +1,169 @@
+# Operación Red Recon — laboratorio de reconocimiento de redes
+# Levantar:  docker compose up -d --build
+# Entrar:    docker compose exec attacker bash
+# Scoreboard http://localhost:8080
+#
+# NOTA: varios objetivos usan cap_add NET_ADMIN para manipular iptables/TTL y
+# enseñar estados de puerto, firewall y huella de SO. Es un laboratorio AISLADO
+# y de uso EDUCATIVO. No expongas esta red a Internet.
+
+name: recon-lab
+
+x-target-common: &target-common
+  restart: unless-stopped
+  networks:
+    recon_net:
+
+services:
+  # ----------------------------------------------------------------- Scoreboard
+  scoreboard:
+    build:
+      context: .
+      dockerfile: scoreboard/Dockerfile
+    container_name: recon-scoreboard
+    hostname: scoreboard
+    restart: unless-stopped
+    environment:
+      - RECON_SECRET=cambia-esta-clave-en-produccion
+      - FLASK_ENV=production
+    ports:
+      - "8080:8000"
+    volumes:
+      - scoreboard_data:/data
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.5
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8000/healthz'); sys.exit(0)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ------------------------------------------------------------------- Atacante
+  # OPCIONAL. El laboratorio está pensado para escanearse NATIVAMENTE desde tu
+  # Kali (la red 172.30.0.0/24 es accesible desde el host). Este contenedor solo
+  # se levanta si lo pides con el perfil 'tools':
+  #     docker compose --profile tools up -d attacker
+  #     docker compose exec attacker bash
+  # Útil como alternativa si un alumno no tiene las herramientas instaladas.
+  attacker:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: attacker/Dockerfile
+    container_name: recon-attacker
+    hostname: attacker
+    restart: unless-stopped
+    cap_add:
+      - NET_RAW       # nmap -sS, scapy, hping3 (raw sockets)
+      - NET_ADMIN     # rutas/sniffing avanzado
+    stdin_open: true
+    tty: true
+    depends_on:
+      - scoreboard
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.10
+
+  # --------------------------------------------------------------------- alpha
+  alpha:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/alpha/Dockerfile
+    container_name: recon-alpha
+    hostname: alpha
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.21
+
+  # --------------------------------------------------------------------- bravo
+  bravo:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/bravo/Dockerfile
+    container_name: recon-bravo
+    hostname: bravo
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.22
+
+  # ------------------------------------------------------------------- charlie
+  charlie:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/charlie/Dockerfile
+    container_name: recon-charlie
+    hostname: charlie
+    cap_add:
+      - NET_ADMIN     # iptables: open/closed/filtered
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.23
+
+  # --------------------------------------------------------------------- delta
+  delta:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/delta/Dockerfile
+    container_name: recon-delta
+    hostname: delta
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.24
+
+  # ---------------------------------------------------------------------- echo
+  echo:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/echo/Dockerfile
+    container_name: recon-echo
+    hostname: echo
+    cap_add:
+      - NET_ADMIN     # iptables mangle TTL --ttl-set 128
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.25
+
+  # ------------------------------------------------------------------- foxtrot
+  foxtrot:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/foxtrot/Dockerfile
+    container_name: recon-foxtrot
+    hostname: foxtrot
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.26
+
+  # --------------------------------------------------------------------- hotel
+  hotel:
+    <<: *target-common
+    build:
+      context: .
+      dockerfile: targets/hotel/Dockerfile
+    container_name: recon-hotel
+    hostname: hotel
+    cap_add:
+      - NET_ADMIN     # iptables: respuestas SYN/ACK/RST/drop para hping3
+    networks:
+      recon_net:
+        ipv4_address: 172.30.0.27
+
+networks:
+  recon_net:
+    name: recon_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1
+
+volumes:
+  scoreboard_data:

@@ -1,0 +1,41 @@
+
+  ____  ____  _____ ____    _    ____ ___ ___  _   _
+ / _  \|  _ \| ____|  _ \  / \  / ___|_ _/ _ \| \ | |
+| | | || |_) |  _| | |_) |/ _ \| |    | | | | |  \| |
+| |_| ||  __/| |___|  _ </ ___ \ |___ | | |_| | |\  |
+ \____/|_|   |_____|_| \_\_/   \_\____|___\___/|_| \_|
+
+  ____  _____ ____    ____  _____ ____ ___  _   _
+ |  _ \| ____|  _ \  |  _ \| ____/ ___/ _ \| \ | |
+ | |_) |  _| | | | | | |_) |  _|| |  | | | |  \| |
+ |  _ <| |___| |_| | |  _ <| |__| |__| |_| | |\  |
+ |_| \_\_____|____/  |_| \_\_____\____\___/|_| \_|
+
+=========================== OPERACION RED RECON ===========================
+  Laboratorio educativo AISLADO de reconocimiento de redes.
+  Estación del ATACANTE (172.30.0.10) — solo herramientas ofensivas.
+  Uso EXCLUSIVAMENTE didáctico y autorizado dentro de esta red Docker.
+===========================================================================
+
+  SCOREBOARD (envía aquí tus flags y respuestas):
+    - Desde tu navegador (host):   http://localhost:8080
+    - Desde dentro del lab:        http://172.30.0.5:8000
+
+  OBJETIVOS (red recon_net — 172.30.0.0/24):
+    alpha    172.30.0.21   web + SSH reales      (-sT/-sS/-sV)
+    bravo    172.30.0.22   versión + redis       (-sV, redis-cli)
+    charlie  172.30.0.23   open/closed/filtered  (firewall)
+    delta    172.30.0.24   ruido/decoys/timing   (aguja en el pajar)
+    echo     172.30.0.25   OS/TTL detection      (-O)
+    foxtrot  172.30.0.26   UDP + DNS/NSE         (-sU, dig)
+    hotel    172.30.0.27   hping3 + cabeceras TCP
+
+  QUICKSTART (4 pasos):
+    1) sweep                       # descubrir hosts vivos (nmap -sn 172.30.0.0/24)
+    2) nmap -sV 172.30.0.21        # identificar servicios y versiones
+    3) recon-help                  # chuleta completa de comandos
+    4) Lleva tus flags RECON{...} al scoreboard (http://localhost:8080)
+
+  Comandos: recon-help (chuleta)   recon-targets (tabla de IPs)
+  Tus notas: guárdalas en /labs (ver /labs/README.md)
+===========================================================================

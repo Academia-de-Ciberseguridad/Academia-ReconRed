@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ mission.id }} {{ mission.title }} :: Red Recon{% endblock %}
+
+{% block content %}
+<a class="back" href="{{ url_for('missions') }}">&laquo; volver al tablero</a>
+
+<article class="briefing panel">
+  <header class="brief-h">
+    <div>
+      <span class="mid big">{{ mission.id }}</span>
+      <h2 class="brief-title">{{ mission.title }}</h2>
+    </div>
+    <div class="brief-tags">
+      <span class="card-cat">{{ mission.category }}</span>
+      <span class="pts">{{ mission.points }} pts</span>
+      {% if already_solved %}<span class="tag t-solved">RESUELTA</span>
+      {% elif not unlocked %}<span class="tag t-locked">BLOQUEADA</span>
+      {% else %}<span class="tag t-open">DISPONIBLE</span>{% endif %}
+    </div>
+  </header>
+
+  <dl class="objective">
+    <dt>&gt; objetivo</dt>
+    <dd class="mono">{{ mission.target }}</dd>
+    <dt>&gt; tipo</dt>
+    <dd class="mono">{{ 'FLAG RECON{...}' if mission.type == 'flag' else 'RESPUESTA' }}</dd>
+  </dl>
+
+  <section class="brief-body">
+    <h3 class="sub-h">&gt; briefing</h3>
+    <pre class="brief-text">{{ mission.brief }}</pre>
+  </section>
+
+  {% if feedback_msg %}
+  <div class="feedback {{ 'good' if feedback_ok else 'bad' }}">
+    {{ '[+]' if feedback_ok else '[-]' }} {{ feedback_msg }}
+  </div>
+  {% endif %}
+
+  {# --- Hints revelables --------------------------------------------- #}
+  <section class="hints-box">
+    <h3 class="sub-h">&gt; pistas ({{ n_revealed }}/{{ mission.hints | length }})</h3>
+    {% if revealed_hints %}
+      <ol class="hint-list">
+        {% for h in revealed_hints %}<li>{{ h }}</li>{% endfor %}
+      </ol>
+    {% else %}
+      <p class="muted small">No has revelado pistas todavía.</p>
+    {% endif %}
+    {% if n_revealed < (mission.hints | length) %}
+      <form method="post" action="{{ url_for('hint', mid=mission.id) }}">
+        <button class="btn ghost" type="submit">REVELAR SIGUIENTE PISTA</button>
+      </form>
+    {% else %}
+      <p class="muted small">Todas las pistas reveladas.</p>
+    {% endif %}
+  </section>
+
+  {# --- M12 boss: desclasificación del flag maestro ------------------ #}
+  {% if mission.id == 'M12' %}
+    {% if reveal_master %}
+      <section class="master-reveal">
+        <h3 class="sub-h ok-line">&gt; FLAG MAESTRO DESCLASIFICADO</h3>
+        <p class="muted small">Requisitos cumplidos. Reenvía este flag para cerrar la operación.</p>
+        <code class="master-flag" id="master-flag">{{ reveal_master }}</code>
+        <button class="btn ghost copy-btn" type="button" data-copy="#master-flag">COPIAR</button>
+      </section>
+    {% elif not unlocked %}
+      <section class="locked-req">
+        <h3 class="sub-h">&gt; acceso restringido</h3>
+        <p class="muted">Completa primero las misiones requeridas:</p>
+        <ul class="req-list">
+          {% for r in mission.requires %}
+            <li class="{{ 'done' if r not in missing else 'pending' }}">
+              {{ '[x]' if r not in missing else '[ ]' }} {{ r }}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="muted small">faltan: {{ missing | join(', ') if missing else 'ninguna' }}</p>
+      </section>
+    {% endif %}
+  {% endif %}
+
+  {# --- Formulario de envío ------------------------------------------ #}
+  {% if already_solved %}
+    <div class="feedback good">[+] Misión ya resuelta. Sumaste {{ mission.points }} pts.</div>
+  {% elif not unlocked %}
+    <div class="feedback bad">
+      [-] Misión bloqueada. Faltan: {{ missing | join(', ') }}.
+    </div>
+  {% else %}
+    <form class="submit-form" method="post" action="{{ url_for('submit') }}">
+      <input type="hidden" name="mission_id" value="{{ mission.id }}">
+      <label for="answer">
+        {{ '&gt; introduce el flag:' | safe if mission.type == 'flag' else '&gt; introduce la respuesta:' | safe }}
+      </label>
+      <div class="input-row">
+        <span class="prompt-inline">&gt;</span>
+        <input type="text" id="answer" name="answer" autocomplete="off"
+               spellcheck="false"
+               placeholder="{{ 'RECON{...}' if mission.type == 'flag' else 'respuesta...' }}"
+               required autofocus>
+      </div>
+      <button class="btn" type="submit">ENVIAR</button>
+    </form>
+  {% endif %}
+</article>
+{% endblock %}

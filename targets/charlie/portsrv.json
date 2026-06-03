@@ -1,0 +1,21 @@
+{
+  "_comentario": "Objetivo CHARLIE (172.30.0.23) — estados de puerto open/closed/filtered.",
+  "_comentario2": "portsrv solo ABRE los puertos que deben quedar OPEN: 22 y 31337.",
+  "_comentario3": "80 queda CLOSED (nadie escucha, sin regla -> el kernel responde RST).",
+  "_comentario4": "443/8000/3389/5900 quedan FILTERED via iptables DROP (los aplica entrypoint.sh).",
+  "default_close_ms": 1500,
+  "ports": [
+    {
+      "_nota": "Puerto OPEN clasico: banner SSH-like para que -sV lo identifique como OpenSSH.",
+      "port": 22,
+      "mode": "banner",
+      "banner": "SSH-2.0-OpenSSH_8.9p1 Debian-recon\r\n"
+    },
+    {
+      "_nota": "Puerto OPEN 'oculto' entre filtrados. Su banner entrega el flag de M05.",
+      "port": 31337,
+      "mode": "banner",
+      "banner": "recon-lab puerta-trasera :: RECON{f1lt3r3d_d00r_0p3n3d}\r\n"
+    }
+  ]
+}
